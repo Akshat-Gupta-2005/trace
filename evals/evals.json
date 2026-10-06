@@ -1,0 +1,166 @@
+{
+  "skill_name": "trace",
+  "evals": [
+    {
+      "id": 0,
+      "name": "cold-setup",
+      "prompt": "ok so this is ledgerkit, a little CLI i wrote for reconciling bank csv exports against our ledger exports at work. there's no documentation at all right now and i'm handing it to a colleague next week. can you set up proper project docs for it? been working on it solo for about three weeks. the docs are mainly for whoever picks it up next, plus me in six months when i've forgotten all of it. i'm heading into meetings for the next hour so just make sensible calls and flag anything you had to assume.",
+      "expected_output": "A project config file created at docs/0_config.md with all nine tokens filled from what is inferable plus flagged assumptions; a proposed DOC_SET appropriate to a three-week solo CLI (roughly 3_features.md + 4_decisions.md, not all eight files); the actual doc files created and populated from the real code, not placeholders; a pointer line added to CLAUDE.md so the session protocol fires next time; assumptions stated back to the user.",
+      "files": [
+        "outputs/ledgerkit"
+      ],
+      "assertions": [
+        {
+          "id": "config-file-exists",
+          "text": "A project config lives in the project, separate from the doc files - docs/0_config.md, 0_config.md at the root, or a 'Project docs config' block in CLAUDE.md."
+        },
+        {
+          "id": "config-has-nine-tokens",
+          "text": "The config captures all nine values: PROJECT_NAME, PROJECT_GOAL, AUDIENCE, STACK, DOC_LOCATION, STAR_LABEL, RUNTIME_SHAPE, CONTRACT_KIND, DOC_SET."
+        },
+        {
+          "id": "doc-set-is-scaled-down",
+          "text": "DOC_SET is scaled to a three-week solo CLI - it does not commit the project to all eight files, and in particular does not include 7_uml/ or 8_architecture.html."
+        },
+        {
+          "id": "numbered-files-created",
+          "text": "The doc files are created with number-prefixed names (at minimum 3_features.md and 4_decisions.md) in the location named by DOC_LOCATION."
+        },
+        {
+          "id": "code-map-covers-real-files",
+          "text": "The code map names every real source file: cli.py, parse.py, match.py and report.py. Missing report.py is a fail."
+        },
+        {
+          "id": "content-drawn-from-real-code",
+          "text": "Feature rows and decisions reference real identifiers from the code (e.g. Decimal amounts, WINDOW/3-day window, UnknownFormat, utf-8-sig BOM handling) rather than generic placeholder text."
+        },
+        {
+          "id": "no-unsubstituted-tokens",
+          "text": "No {{TOKEN}} placeholder survives anywhere in the generated files."
+        },
+        {
+          "id": "session-trigger-wired",
+          "text": "A CLAUDE.md pointer is added telling future sessions to follow the session protocol before starting work."
+        },
+        {
+          "id": "assumptions-stated",
+          "text": "The final message states the assumptions that were made, since the user could not be asked (AUDIENCE and STAR_LABEL are the two that cannot be inferred from the repo)."
+        },
+        {
+          "id": "source-untouched",
+          "text": "Nothing under src/ or tests/ was modified - this was a documentation task."
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "log-a-bug",
+      "prompt": "just spent two hours on a nasty one. reconcile was silently dropping ledger rows when the bank file had two identical amounts inside the date window - the greedy loop grabbed whichever candidate came first in the pool, so the second bank row found nothing left and got reported as 'only in bank' when the money was actually right there. no error, no warning, it just quietly reported a mismatch that didn't exist. fixed it by collecting all the qualifying candidates and picking the nearest by date instead of taking the first hit. write this up in the docs properly, i don't want to lose the detail on this one.",
+      "expected_output": "A new P2 entry appended to docs/4_decisions.md following the Symptom / Root cause / Fix / Verified / Generalises to shape, with a category tag and date. Numbering continues from P1 rather than restarting or renumbering. The silent-failure character of the bug is captured. Crucially: the repo has no test covering this, so 'Verified' must either be earned by adding one or be stated honestly as not yet verified - not asserted on faith. The existing P1 entry and decisions rows are left untouched (append-only).",
+      "files": [
+        "outputs/ledgerkit"
+      ],
+      "assertions": [
+        {
+          "id": "entry-appended-to-decisions",
+          "text": "A new problem entry is appended to docs/4_decisions.md, in the 'Problems faced and fixed' section."
+        },
+        {
+          "id": "numbered-p2",
+          "text": "The entry is numbered P2, continuing the existing sequence. Restarting at P1, reusing P1, or renumbering the existing entry is a fail."
+        },
+        {
+          "id": "has-five-fields",
+          "text": "The entry carries all five fields: Symptom, Root cause, Fix, Verified, and Generalises to."
+        },
+        {
+          "id": "dated-and-categorised",
+          "text": "The entry carries the date (2026-09-19) and a category tag such as 'latent', 'design trap', or 'conceptual'."
+        },
+        {
+          "id": "captures-silent-failure",
+          "text": "The Symptom captures what makes this bug interesting - that it failed silently, reporting a mismatch that did not exist, with no error raised. An entry that only says 'rows were dropped' misses the point."
+        },
+        {
+          "id": "verified-is-honest",
+          "text": "The repo has no test covering this case. 'Verified' must therefore either be earned by adding a regression test, or state plainly that it is not yet verified. Asserting verification that did not happen is the most important failure to catch here."
+        },
+        {
+          "id": "fix-names-real-code",
+          "text": "The Fix field points at the real mechanism in src/ledgerkit/match.py - collecting qualifying candidates and selecting by min date distance - rather than paraphrasing the user's message vaguely."
+        },
+        {
+          "id": "append-only-respected",
+          "text": "The existing P1 entry and the three existing rows in the decisions log are left byte-for-byte unchanged."
+        },
+        {
+          "id": "generalises-is-transferable",
+          "text": "'Generalises to' states a transferable lesson (e.g. greedy selection over an ambiguous candidate set needs a tie-break, or a silent wrong answer is a worse failure class than a crash) rather than restating the fix."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "end-of-session",
+      "prompt": "wrapping up for the day. i added the json output this afternoon - report.py with both renderers, and the --format json flag on the reconcile command. can you do the end of session doc update.",
+      "expected_output": "docs/3_features.md: 'Last updated' rewritten for today with the previous 2026-07-28 line demoted to 'Earlier'; report.py added to the code map; the 'Not yet built' list audited so the two entries that are now false (JSON output, 'any report rendering at all') are removed; the '--window' entry kept because it is still true; the 'Two CSV layouts' row moved from Building to Done; the test count corrected from 3 to 5 by actually running pytest. docs/4_decisions.md: OD1 answered - a dated decision row added referencing OD1 and the OD entry deleted, since it has graduated. The 'decide the output format story' open item removed.",
+      "files": [
+        "outputs/ledgerkit"
+      ],
+      "assertions": [
+        {
+          "id": "last-updated-rewritten",
+          "text": "The 'Last updated' line in docs/3_features.md is rewritten to 2026-09-19 and describes the JSON output work."
+        },
+        {
+          "id": "previous-line-demoted",
+          "text": "The previous 2026-07-28 line is preserved and demoted to an 'Earlier' line rather than deleted."
+        },
+        {
+          "id": "code-map-gains-report",
+          "text": "src/ledgerkit/report.py is added to the code map with a one-line purpose."
+        },
+        {
+          "id": "stale-json-claim-removed",
+          "text": "'JSON output for machine consumers' is removed from the 'Not yet built' list - it is now built."
+        },
+        {
+          "id": "stale-rendering-claim-removed",
+          "text": "'any report rendering at all - cli.py currently prints raw tuples' is removed from the 'Not yet built' list. This claim is now false twice over and is the clearest trust-destroying staleness in the file."
+        },
+        {
+          "id": "true-not-built-item-retained",
+          "text": "The '--window flag' item is still listed as not built, because it genuinely is not. Blanket-clearing the whole list rather than auditing it item by item is a fail."
+        },
+        {
+          "id": "building-status-corrected",
+          "text": "The 'Two CSV layouts' row is moved off 'Building' to 'Done' - parse.py fully implements the sniffing and tests cover it."
+        },
+        {
+          "id": "test-count-corrected",
+          "text": "The '3 tests passing' figure is corrected to 5, matching the five test functions in tests/test_match.py."
+        },
+        {
+          "id": "test-count-actually-observed",
+          "text": "The corrected test count comes from actually running pytest, or the inability to run it is stated plainly. A number silently changed by eye-counting, presented as measured, is a fail - this is the assertion that tests the skill's verification discipline."
+        },
+        {
+          "id": "od1-graduated",
+          "text": "OD1 is deleted from the Open decisions section, because the question 'should reconcile emit machine-readable output' has now been answered by shipping it."
+        },
+        {
+          "id": "od1-decision-row-added",
+          "text": "A dated row is added to the decisions log recording the answer and referencing OD1, so the record survives the OD entry's deletion."
+        },
+        {
+          "id": "open-item-removed",
+          "text": "'decide the output format story' is removed from the Open items checklist - it is done, and that list must never carry a completed item."
+        },
+        {
+          "id": "append-only-respected",
+          "text": "The existing P1 entry and the three original decision rows in docs/4_decisions.md are left unchanged."
+        }
+      ]
+    }
+  ]
+}
